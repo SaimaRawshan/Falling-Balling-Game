@@ -4,6 +4,8 @@ from OpenGL.GLU import *
 import random
 import math
 
+
+
 W_Width, W_Height = 500, 600
 leftsteps = []
 rightsteps = []
@@ -13,9 +15,11 @@ gap = 100
 ball_x, ball_y = 250, 585
 ball_radius = 15
 screen_speed = 8
-ball_speed = 1.5
+ball_speed = 1.2
 score = 0
+highest_score=0
 game_over = False
+
 
 def init():
     glMatrixMode(GL_PROJECTION)
@@ -55,19 +59,19 @@ def det_zone(x0, y0, x1, y1):
 def transform_zone(x, y, zone, points):
     if zone == 0:
         points.append((x, y))
-    if zone == 1:
+    elif zone == 1:
         points.append((y, x))
-    if zone == 2:
+    elif zone == 2:
         points.append((-y, x))
-    if zone == 3:
+    elif zone == 3:
         points.append((-x, y))
-    if zone == 4:
+    elif zone == 4:
         points.append((-x, -y))
-    if zone == 5:
+    elif zone == 5:
         points.append((-y, -x))
-    if zone == 6:
+    elif zone == 6:
         points.append((y, -x))
-    if zone == 7:
+    elif zone == 7:
         points.append((x, -y))
 
 def draw_points(coords):
@@ -101,19 +105,19 @@ def line_drawing_algo(x0, y0, x1, y1):
     zone = det_zone(x0, y0, x1, y1)
     if zone == 0:
         mid_point_line(x0, y0, x1, y1, zone)
-    if zone == 1:
+    elif zone == 1:
         mid_point_line(y0, x0, y1, x1, zone)
-    if zone == 2:
+    elif zone == 2:
         mid_point_line(y0, -x0, y1, -x1, zone)
-    if zone == 3:
+    elif zone == 3:
         mid_point_line(-x0, y0, -x1, y1, zone)
-    if zone == 4:
+    elif zone == 4:
         mid_point_line(-x0, -y0, -x1, -y1, zone)
-    if zone == 5:
+    elif zone == 5:
         mid_point_line(-y0, -x0, -y1, -x1, zone)
-    if zone == 6:
+    elif zone == 6:
         mid_point_line(-y0, x0, -y1, x1, zone)
-    if zone == 7:
+    elif zone == 7:
         mid_point_line(x0, -y0, x1, -y1, zone)
 
 
@@ -188,7 +192,6 @@ def display():
     glClear(GL_COLOR_BUFFER_BIT)
 
     if game_over:
-        # reset_game()
         glutSwapBuffers()
         return
 
@@ -209,17 +212,22 @@ def display():
     for step in rightsteps:
         draw_step(step[0], step[1], step[2], step[3])
 
+
+    glColor3f(1.0, 1.0, 1.0)  
+    draw_text(10, 570, f"Score: {score}")
+
     glutSwapBuffers()
 
 def animate():
     global ball_y, ball_x, ball_speed, leftsteps, rightsteps, screen_speed, W_Height, score, game_over
 
     if game_over:
+        gameover()
+        glutSwapBuffers()
         return
     
-    # Ball speed and screen speed depending on score
     if score > 50:
-        ball_speed = 3 + (score * 0.015)
+        ball_speed = 3 + (score * 0.01)
         screen_speed = 10 + (score * 0.03)
     elif score > 100:
         ball_speed = 3 + (score * 0.02)
@@ -237,13 +245,7 @@ def animate():
     step_collision = check_collision()
 
     if ball_y - ball_radius <= 0:
-        ball_speed = 0  
-        ball_y = -ball_radius  
-
-
-        if step_collision:
-            ball_y = step_collision[1] + step_collision[3] + ball_radius  
-            ball_speed = 3 
+        game_over=True
     
     elif step_collision:
         ball_y += screen_speed
@@ -258,30 +260,41 @@ def animate():
         ball_y -= ball_speed
         ball_speed += 0.1
 
-    # step's speed
     for step in leftsteps:
         step[1] += screen_speed
     for step in rightsteps:
         step[1] += screen_speed
 
-    # Remove steps that have moved from the screen
     if leftsteps and leftsteps[0][1] > W_Height:
         leftsteps.pop(0)
         rightsteps.pop(0)
         score += 1
 
-    # Generate new steps 
     if not leftsteps or leftsteps[-1][1] >= 150:
         generate_new_step()
 
-    #ceiling touch---> Game Over
-    if ball_y + ball_radius >= W_Height:
+    
+    if ball_y + ball_radius >= W_Height: #ceiling touch
         game_over = True
+        gameover()
+        glutSwapBuffers()
         return
-
     glutPostRedisplay()
 
+def gameover():
+    global highest_score
+    draw_text(190, 320, "GAME OVER!")
+    draw_text(210, 280, f"Score: {score}")
+    if score>highest_score:
+        highest_score=score
+    draw_text(180, 240, f"Highest Score: {highest_score}")
+    draw_text(180, 200, "Press R to Restart")
 
+def draw_text(x, y, text, font= GLUT_BITMAP_HELVETICA_18):
+    glColor3f(1.0, 1.0, 1.0) 
+    glRasterPos2f(x, y)     
+    for ch in text:
+        glutBitmapCharacter(font, ord(ch))
 
 
 def check_collision():
@@ -300,19 +313,16 @@ def check_collision():
         if step_left <= ball_x <= step_right and ball_bottom <= step_top and ball_bottom > step_bottom:
             return step 
 
-    return None
-
-
-
 
 def keyboard_listener(key, x, y):
-    global ball_x, ball_y, game_over
+    global ball_x, ball_y, game_over,score
 
     if key == b'a' and (ball_x >= 25) and not game_over:
         ball_x -= 20
     elif key == b'd' and (ball_x <= 475) and not game_over:
         ball_x += 20
     elif key == b'r':
+        print(score)
         reset_game()
 
 
