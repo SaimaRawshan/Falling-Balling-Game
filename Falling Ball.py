@@ -3,6 +3,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import random
 import math
+from OpenGL.GLUT import  GLUT_BITMAP_9_BY_15
 
 
 
@@ -283,14 +284,14 @@ def animate():
 
 def gameover():
     global highest_score
-    draw_text(190, 320, "GAME OVER!")
-    draw_text(210, 280, f"Score: {score}")
+    draw_text(200, 350, "GAME OVER!")
+    draw_text(210, 310, f"Score: {score}")
     if score>highest_score:
         highest_score=score
-    draw_text(180, 240, f"Highest Score: {highest_score}")
-    draw_text(180, 200, "Press R to Restart")
+    draw_text(180, 270, f"Highest Score: {highest_score}")
+    draw_text(180, 230, "Press R to Restart")
 
-def draw_text(x, y, text, font= GLUT_BITMAP_HELVETICA_18):
+def draw_text(x, y, text, font= GLUT_BITMAP_9_BY_15):
     glColor3f(1.0, 1.0, 1.0) 
     glRasterPos2f(x, y)     
     for ch in text:
@@ -322,7 +323,6 @@ def keyboard_listener(key, x, y):
     elif key == b'd' and (ball_x <= 475) and not game_over:
         ball_x += 20
     elif key == b'r':
-        print(score)
         reset_game()
 
 
