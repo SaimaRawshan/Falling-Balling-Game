@@ -328,9 +328,9 @@ def keyboard_listener(key, x, y):
 
 
 def timer(value):
-    global screen_speed
+    # global screen_speed
     glutPostRedisplay()
-    glutTimerFunc(int(1500 / screen_speed), timer, 0)
+    glutTimerFunc(1500, timer, 0)
 
 
 glutInit()
